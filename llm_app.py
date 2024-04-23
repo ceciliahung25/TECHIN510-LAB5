@@ -85,7 +85,7 @@ with st.sidebar:
         submit_button = st.form_submit_button(label='Generate Yoga Flow')
 
 # Main area for title and generated yoga flow
-st.markdown('<p class="big-title">🧘🏻 Your Customized Yoga Sequence</p>', unsafe_allow_html=True)
+st.markdown('<p class="big-title"> 🧘🏻 Your Customized Yoga Sequence</p>', unsafe_allow_html=True)
 
 # Generate content when the form is submitted
 if submit_button:
