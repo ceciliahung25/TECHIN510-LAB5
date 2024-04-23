@@ -1,11 +1,27 @@
 import streamlit as st
-import random
+import google.generativeai as genai
+
+# Set up your API key here
+api_key = 'AIzaSyDZAM2I9feua7e54H_v071RKXZjgQTwqNg'
+genai.configure(api_key=api_key)
+model = genai.GenerativeModel("gemini-pro")
+
+# Adjusted function to match the expected input structure for the Gemini API
+def generate_content_with_gemini(prompt_text):
+    # The API might be expecting a structured dict with a 'parts' key
+    request_content = {
+        "parts": [{"text": prompt_text}],
+        # Add other keys like 'max_length' if needed by the API
+    }
+    response = model.generate_content(request_content)
+    return response.text
+
 
 # Set page config to wide mode for better spacing
 st.set_page_config(layout="wide", page_title="Yoga Flow Guide")
 
 # Custom CSS for styling
-custom_css = """
+st.markdown("""
     <style>
         .textbox {
             background-color: #f0f0f0;
@@ -39,41 +55,7 @@ custom_css = """
             margin-bottom: 10px;
         }
     </style>
-"""
-
-# Inject custom CSS
-st.markdown(custom_css, unsafe_allow_html=True)
-
-# Define a simple function to generate a yoga flow based on user input
-def generate_yoga_flow(experience_level, focus_areas, special_considerations):
-    # Placeholder dictionaries for each experience level
-    poses = {
-        'Beginner': [
-            ('Mountain Pose', 'Tadasana', 'Stand with your feet together, hands at sides. Take a deep breath.'),
-            # ... Add more beginner poses here
-        ],
-        'Intermediate': [
-            ('Tree Pose', 'Vrikshasana', 'Stand on one leg, place the other foot on your inner thigh. Balance and breathe.'),
-            # ... Add more intermediate poses here
-        ],
-        'Advanced': [
-            ('King Pigeon Pose', 'Rajakapotasana', 'From a lunge, bend your back leg and reach back to grab your ankle.'),
-            # ... Add more advanced poses here
-        ]
-    }
-    
-    # Select a random pose based on experience level
-    pose_name, pose_sanskrit, instructions = random.choice(poses[experience_level])
-    
-    # Create the HTML content for the pose
-    yoga_flow_html = f"""
-    <div class="yoga-sequence">
-        <div class="pose-title">{pose_name} ({pose_sanskrit})</div>
-        <div class="step">{instructions}</div>
-    </div>
-    """
-    
-    return yoga_flow_html
+""", unsafe_allow_html=True)
 
 # Sidebar for user input
 with st.sidebar:
@@ -83,7 +65,7 @@ with st.sidebar:
     Provide details about your current situation and needs for your yoga practice. The guide will be generated to be easily followed by voice instruction.
     """)
     st.markdown('</div>', unsafe_allow_html=True)
-    
+
     # Sidebar form for input collection
     with st.form(key='yoga_planner_form'):
         experience_level = st.selectbox(
@@ -103,9 +85,16 @@ with st.sidebar:
         submit_button = st.form_submit_button(label='Generate Yoga Flow')
 
 # Main area for title and generated yoga flow
-st.markdown('<p class="big-title">Your Customized Yoga Pose</p>', unsafe_allow_html=True)
+st.markdown('<p class="big-title">Your Customized Yoga Sequence</p>', unsafe_allow_html=True)
 
-# Process the input and generate the yoga flow when the submit button is clicked
+# Generate content when the form is submitted
 if submit_button:
-    yoga_flow = generate_yoga_flow(experience_level, focus_areas, special_considerations)
+    # Build the text prompt for the API call
+    prompt_text = f"Create a yoga flow for someone with experience level: {experience_level}, " \
+                  f"focus areas: {', '.join(focus_areas)}, " \
+                  f"and the following considerations: {special_considerations}"
+    
+    yoga_flow = generate_content_with_gemini(prompt_text)
     st.markdown(yoga_flow, unsafe_allow_html=True)
+
+
